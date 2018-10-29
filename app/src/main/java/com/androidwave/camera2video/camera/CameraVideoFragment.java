@@ -35,6 +35,7 @@ import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.widget.Toast;
+
 import com.androidwave.camera2video.R;
 import com.androidwave.camera2video.ui.base.BaseFragment;
 import com.karumi.dexter.Dexter;
@@ -42,6 +43,7 @@ import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -62,15 +64,6 @@ public abstract class CameraVideoFragment extends BaseFragment {
     private static final int SENSOR_ORIENTATION_INVERSE_DEGREES = 270;
     private static final SparseIntArray DEFAULT_ORIENTATIONS = new SparseIntArray();
     private static final SparseIntArray INVERSE_ORIENTATIONS = new SparseIntArray();
-
-
-    private static final int REQUEST_VIDEO_PERMISSIONS = 101;
-    private static final String[] VIDEO_PERMISSIONS = {
-            Manifest.permission.CAMERA,
-            Manifest.permission.RECORD_AUDIO,
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-    };
 
     static {
         DEFAULT_ORIENTATIONS.append(Surface.ROTATION_0, 90);
@@ -210,21 +203,27 @@ public abstract class CameraVideoFragment extends BaseFragment {
 
 
     /**
-     * In this sample, we choose a video size with 3x4 aspect ratio. Also, we don't use sizes
+     * In this sample, we choose a video size with 3x4 aspect ratio. for more perfect ness 720 as well Also, we don't use sizes
      * larger than 1080p, since MediaRecorder cannot handle such a high-resolution video.
      *
      * @param choices The list of available sizes
-     * @return The video size
+     * @return The video size 1080p,720px
      */
     private static Size chooseVideoSize(Size[] choices) {
         for (Size size : choices) {
-            if (size.getWidth() == size.getHeight() * 16 / 9 && size.getWidth() <= 1080) {
+            if (1920 == size.getWidth() && 1080 == size.getHeight()) {
+                return size;
+            }
+        }
+        for (Size size : choices) {
+            if (size.getWidth() == size.getHeight() * 4 / 3 && size.getWidth() <= 1080) {
                 return size;
             }
         }
         Log.e(TAG, "Couldn't find any suitable video size");
         return choices[choices.length - 1];
     }
+
 
     /**
      * Given {@code choices} of {@code Size}s supported by a camera, chooses the smallest one whose
@@ -308,9 +307,7 @@ public abstract class CameraVideoFragment extends BaseFragment {
     }
 
     /**
-     * Requesting multiple permissions (storage and camera) at once
-     * This uses multiple permission model from dexter
-     * On permanent denial opens settings dialog
+     * Requesting permissions storage,audio and camera at once
      */
     public void requestStoragePermission() {
         Dexter.withActivity(getActivity()).withPermissions(Manifest.permission.CAMERA,
@@ -320,7 +317,7 @@ public abstract class CameraVideoFragment extends BaseFragment {
                 .withListener(new MultiplePermissionsListener() {
                     @Override
                     public void onPermissionsChecked(MultiplePermissionsReport report) {
-                        // check if all permissions are granted
+                        // check if all permissions are granted or not
                         if (report.areAllPermissionsGranted()) {
                             if (mTextureView.isAvailable()) {
                                 openCamera(mTextureView.getWidth(), mTextureView.getHeight());
@@ -328,9 +325,9 @@ public abstract class CameraVideoFragment extends BaseFragment {
                                 mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
                             }
                         }
-                        // check for permanent denial of any permission
+                        // check for permanent denial of any permission show alert dialog
                         if (report.isAnyPermissionPermanentlyDenied()) {
-                            // show alert dialog navigating to Settings
+                            // open Settings activity
                             showSettingsDialog();
                         }
                     }
@@ -345,9 +342,7 @@ public abstract class CameraVideoFragment extends BaseFragment {
     }
 
     /**
-     * Showing Alert Dialog with Settings option
-     * Navigates user to app settings
-     * NOTE: Keep proper title and message depending on your app
+     * Showing Alert Dialog with Settings option in case of deny any permission
      */
     private void showSettingsDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -361,7 +356,7 @@ public abstract class CameraVideoFragment extends BaseFragment {
 
     }
 
-    // navigating user to app settings
+    // navigating settings app
     private void openSettings() {
         Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
         Uri uri = Uri.fromParts("package", getActivity().getPackageName(), null);
@@ -383,8 +378,11 @@ public abstract class CameraVideoFragment extends BaseFragment {
             if (!mCameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
                 throw new RuntimeException("Time out waiting to lock camera opening.");
             }
-
+            /**
+             * default front camera will activate
+             */
             String cameraId = manager.getCameraIdList()[0];
+
             CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraId);
             StreamConfigurationMap map = characteristics
                     .get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
@@ -413,8 +411,6 @@ public abstract class CameraVideoFragment extends BaseFragment {
         } catch (CameraAccessException e) {
             Log.e(TAG, "openCamera: Cannot access the camera.");
         } catch (NullPointerException e) {
-            // Currently an NPE is thrown when the Camera2API is used but not supported on the
-            // device this code runs.
             Log.e(TAG, "Camera2API is not supported on the device.");
         } catch (InterruptedException e) {
             throw new RuntimeException("Interrupted while trying to lock camera opening.");
@@ -422,6 +418,7 @@ public abstract class CameraVideoFragment extends BaseFragment {
     }
 
     /**
+     * Create directory and return file
      * returning video file
      */
     private File getOutputMediaFile() {
@@ -429,7 +426,6 @@ public abstract class CameraVideoFragment extends BaseFragment {
         // External sdcard location
         File mediaStorageDir = new File(Environment.getExternalStorageDirectory(),
                 VIDEO_DIRECTORY_NAME);
-
         // Create the storage directory if it does not exist
         if (!mediaStorageDir.exists()) {
             if (!mediaStorageDir.mkdirs()) {
@@ -449,6 +445,9 @@ public abstract class CameraVideoFragment extends BaseFragment {
         return mediaFile;
     }
 
+    /**
+     * close camera and release object
+     */
     private void closeCamera() {
         try {
             mCameraOpenCloseLock.acquire();
@@ -559,7 +558,7 @@ public abstract class CameraVideoFragment extends BaseFragment {
         if (null == activity) {
             return;
         }
-        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
+        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
         mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
         /**
@@ -604,18 +603,20 @@ public abstract class CameraVideoFragment extends BaseFragment {
             mPreviewBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
             List<Surface> surfaces = new ArrayList<>();
 
-            // Set up Surface for the camera preview
+            /**
+             * Surface for the camera preview set up
+             */
+
             Surface previewSurface = new Surface(texture);
             surfaces.add(previewSurface);
             mPreviewBuilder.addTarget(previewSurface);
 
-            // Set up Surface for the MediaRecorder
+            //MediaRecorder setup for surface
             Surface recorderSurface = mMediaRecorder.getSurface();
             surfaces.add(recorderSurface);
             mPreviewBuilder.addTarget(recorderSurface);
 
             // Start a capture session
-            // Once the session starts, we can update the UI and start recording
             mCameraDevice.createCaptureSession(surfaces, new CameraCaptureSession.StateCallback() {
 
                 @Override

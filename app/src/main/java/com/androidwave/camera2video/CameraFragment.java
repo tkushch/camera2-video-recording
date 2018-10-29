@@ -1,19 +1,21 @@
 package com.androidwave.camera2video;
 
-
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.MediaController;
+import android.widget.VideoView;
 
 import com.androidwave.camera2video.camera.AutoFitTextureView;
 import com.androidwave.camera2video.camera.CameraVideoFragment;
 
+import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 import butterknife.OnClick;
+import butterknife.Unbinder;
 
 
 /**
@@ -23,12 +25,15 @@ import butterknife.OnClick;
  */
 public class CameraFragment extends CameraVideoFragment {
 
-
-    @InjectView(R.id.mTextureView)
+    @BindView(R.id.mTextureView)
     AutoFitTextureView mTextureView;
-    @InjectView(R.id.btnPlay)
-    ImageView btnPlay;
-
+    @BindView(R.id.mRecordVideo)
+    ImageView mRecordVideo;
+    @BindView(R.id.mVideoView)
+    VideoView mVideoView;
+    @BindView(R.id.mPlayVideo)
+    ImageView mPlayVideo;
+    Unbinder unbinder;
     private String mOutputFilePath;
 
     public CameraFragment() {
@@ -59,7 +64,7 @@ public class CameraFragment extends CameraVideoFragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_camera, container, false);
-        ButterKnife.inject(this, view);
+        unbinder = ButterKnife.bind(this, view);
         return view;
     }
 
@@ -73,29 +78,62 @@ public class CameraFragment extends CameraVideoFragment {
 
     }
 
+    @OnClick({R.id.mRecordVideo, R.id.mPlayVideo})
+    public void onViewClicked(View view) {
+        switch (view.getId()) {
+            case R.id.mRecordVideo:
+                /**
+                 * If media is not recoding then start recording else stop recording
+                 */
+                if (mIsRecordingVideo) {
+                    try {
+                        stopRecordingVideo();
+                        prepareViews();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                } else {
+                    startRecordingVideo();
+                    mRecordVideo.setImageResource(R.drawable.ic_stop);
+                    //Receive out put file here
+                    mOutputFilePath = getCurrentFile().getAbsolutePath();
+                }
+                break;
+            case R.id.mPlayVideo:
+                mVideoView.start();
+                mPlayVideo.setVisibility(View.GONE);
+                break;
+        }
+    }
+
+    private void prepareViews() {
+        if (mVideoView.getVisibility() == View.GONE) {
+            mVideoView.setVisibility(View.VISIBLE);
+            mPlayVideo.setVisibility(View.VISIBLE);
+            mTextureView.setVisibility(View.GONE);
+            setMediaForRecordVideo();
+        }
+    }
+
+    private void setMediaForRecordVideo() {
+        // Set media controller
+        mVideoView.setMediaController(new MediaController(getActivity()));
+        mVideoView.requestFocus();
+        mVideoView.setVideoPath(mOutputFilePath);
+        mVideoView.seekTo(100);
+        mVideoView.setOnCompletionListener(mp -> {
+            // Reset player
+            mVideoView.setVisibility(View.GONE);
+            mTextureView.setVisibility(View.VISIBLE);
+            mPlayVideo.setVisibility(View.GONE);
+            mRecordVideo.setImageResource(R.drawable.ic_record);
+        });
+    }
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        ButterKnife.reset(this);
-    }
-
-
-    @OnClick(R.id.btnPlay)
-    public void onViewClicked() {
-        if (mIsRecordingVideo) {
-            try {
-                stopRecordingVideo();
-                btnPlay.setImageResource(R.drawable.ic_play_button);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-        } else {
-            startRecordingVideo();
-            btnPlay.setImageResource(R.drawable.ic_stop);
-            //Receive out put file here
-            mOutputFilePath = getCurrentFile().getAbsolutePath();
-        }
-
+        unbinder.unbind();
     }
 }
