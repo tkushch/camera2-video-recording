@@ -60,24 +60,25 @@ public abstract class CameraVideoFragment extends BaseFragment {
 
     private static final String TAG = "CameraVideoFragment";
 
-    private static final int SENSOR_ORIENTATION_DEFAULT_DEGREES = 90;
     private static final int SENSOR_ORIENTATION_INVERSE_DEGREES = 270;
-    private static final SparseIntArray DEFAULT_ORIENTATIONS = new SparseIntArray();
+    private static final int SENSOR_ORIENTATION_DEFAULT_DEGREES = 90;
     private static final SparseIntArray INVERSE_ORIENTATIONS = new SparseIntArray();
+    private static final SparseIntArray DEFAULT_ORIENTATIONS = new SparseIntArray();
 
     static {
-        DEFAULT_ORIENTATIONS.append(Surface.ROTATION_0, 90);
-        DEFAULT_ORIENTATIONS.append(Surface.ROTATION_90, 0);
-        DEFAULT_ORIENTATIONS.append(Surface.ROTATION_180, 270);
-        DEFAULT_ORIENTATIONS.append(Surface.ROTATION_270, 180);
-    }
-
-    static {
-        INVERSE_ORIENTATIONS.append(Surface.ROTATION_0, 270);
-        INVERSE_ORIENTATIONS.append(Surface.ROTATION_90, 180);
-        INVERSE_ORIENTATIONS.append(Surface.ROTATION_180, 90);
         INVERSE_ORIENTATIONS.append(Surface.ROTATION_270, 0);
+        INVERSE_ORIENTATIONS.append(Surface.ROTATION_180, 90);
+        INVERSE_ORIENTATIONS.append(Surface.ROTATION_90, 180);
+        INVERSE_ORIENTATIONS.append(Surface.ROTATION_0, 270);
     }
+
+    static {
+        DEFAULT_ORIENTATIONS.append(Surface.ROTATION_90, 0);
+        DEFAULT_ORIENTATIONS.append(Surface.ROTATION_0, 90);
+        DEFAULT_ORIENTATIONS.append(Surface.ROTATION_270, 180);
+        DEFAULT_ORIENTATIONS.append(Surface.ROTATION_180, 270);
+    }
+
 
     private File mCurrentFile;
 
@@ -203,7 +204,7 @@ public abstract class CameraVideoFragment extends BaseFragment {
 
 
     /**
-     * In this sample, we choose a video size with 3x4 aspect ratio. for more perfect ness 720 as well Also, we don't use sizes
+     * In this sample, we choose a video size with 3x4 for  aspect ratio. for more perfectness 720 as well Also, we don't use sizes
      * larger than 1080p, since MediaRecorder cannot handle such a high-resolution video.
      *
      * @param choices The list of available sizes
@@ -423,10 +424,10 @@ public abstract class CameraVideoFragment extends BaseFragment {
      */
     private File getOutputMediaFile() {
 
-        // External sdcard location
+        // External sdcard file location
         File mediaStorageDir = new File(Environment.getExternalStorageDirectory(),
                 VIDEO_DIRECTORY_NAME);
-        // Create the storage directory if it does not exist
+        // Create storage directory if it does not exist
         if (!mediaStorageDir.exists()) {
             if (!mediaStorageDir.mkdirs()) {
                 Log.d(TAG, "Oops! Failed create "
@@ -440,8 +441,6 @@ public abstract class CameraVideoFragment extends BaseFragment {
 
         mediaFile = new File(mediaStorageDir.getPath() + File.separator
                 + "VID_" + timeStamp + ".mp4");
-
-        Log.d(TAG, "getOutputMediaFile: " + mediaFile.getAbsolutePath());
         return mediaFile;
     }
 
