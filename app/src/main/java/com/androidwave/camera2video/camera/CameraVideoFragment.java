@@ -270,7 +270,7 @@ public abstract class CameraVideoFragment extends BaseFragment {
     public void onResume() {
         super.onResume();
         startBackgroundThread();
-        requestStoragePermission();
+        requestPermission();
     }
 
     @Override
@@ -308,9 +308,9 @@ public abstract class CameraVideoFragment extends BaseFragment {
     }
 
     /**
-     * Requesting permissions storage,audio and camera at once
+     * Requesting permissions storage, audio and camera at once
      */
-    public void requestStoragePermission() {
+    public void requestPermission() {
         Dexter.withActivity(getActivity()).withPermissions(Manifest.permission.CAMERA,
                 Manifest.permission.RECORD_AUDIO,
                 Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -405,7 +405,7 @@ public abstract class CameraVideoFragment extends BaseFragment {
             mMediaRecorder = new MediaRecorder();
             if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
-                requestStoragePermission();
+                requestPermission();
                 return;
             }
             manager.openCamera(cameraId, mStateCallback, null);
