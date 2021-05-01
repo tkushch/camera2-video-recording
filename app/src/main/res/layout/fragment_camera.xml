@@ -6,28 +6,38 @@
     android:layout_height="match_parent"
     tools:context=".CameraFragment">
 
-
+    <com.androidwave.camera2video.MyDraw
+            android:background="#000000"
+            android:layout_width="0dp" android:layout_height="0dp"
+                                         app:layout_constraintEnd_toEndOf="parent"
+                                         app:layout_constraintStart_toStartOf="parent"
+                                         app:layout_constraintTop_toTopOf="parent"
+                                         app:layout_constraintVertical_bias="0.0"
+                                         android:id="@+id/myDraw" app:layout_constraintHorizontal_bias="1.0"
+                                         app:layout_constraintBottom_toBottomOf="parent"
+                                         android:layout_marginBottom="140dp"/>
     <com.androidwave.camera2video.camera.AutoFitTextureView
-        android:id="@+id/mTextureView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
+            android:id="@+id/mTextureView"
+            android:layout_width="79dp"
+            android:layout_height="109dp"
+            app:layout_constraintBottom_toBottomOf="@+id/mRecordVideo"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/mRecordVideo"
+            app:layout_constraintTop_toTopOf="@+id/mRecordVideo" app:layout_constraintHorizontal_bias="0.496"
+            app:layout_constraintVertical_bias="0.666"/>
     <ImageView
-        android:id="@+id/mRecordVideo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:contentDescription="@string/play_stop"
-        android:src="@drawable/ic_record"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+            android:background="#FFFFFF"
+            android:id="@+id/mRecordVideo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:contentDescription="@string/play_stop"
+            android:src="@drawable/ic_record"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" app:layout_constraintHorizontal_bias="0.75"/>
 
     <VideoView
         android:id="@+id/mVideoView"

@@ -25,6 +25,9 @@ import butterknife.Unbinder;
  */
 public class CameraFragment extends CameraVideoFragment {
 
+
+    @BindView(R.id.myDraw)
+    MyDraw md;
     @BindView(R.id.mTextureView)
     AutoFitTextureView mTextureView;
     @BindView(R.id.mRecordVideo)
@@ -35,6 +38,7 @@ public class CameraFragment extends CameraVideoFragment {
     ImageView mPlayVideo;
     Unbinder unbinder;
     private String mOutputFilePath;
+
 
     public CameraFragment() {
         // Required empty public constructor
@@ -87,6 +91,7 @@ public class CameraFragment extends CameraVideoFragment {
                  */
                 if (mIsRecordingVideo) {
                     try {
+                        md.setPause(true);
                         stopRecordingVideo();
                         prepareViews();
                     } catch (Exception e) {
@@ -94,6 +99,7 @@ public class CameraFragment extends CameraVideoFragment {
                     }
 
                 } else {
+                    md.setPause(false);
                     startRecordingVideo();
                     mRecordVideo.setImageResource(R.drawable.ic_stop);
                     //Receive out put file here
