@@ -2,14 +2,16 @@ package com.androidwave.camera2video;
 
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.view.SurfaceHolder;
 import android.view.View;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 public class MyDraw extends View {
@@ -17,6 +19,7 @@ public class MyDraw extends View {
     private int x, y, radius, h, w;
     private boolean pause = true, isFirst;
     private int time;
+    private List<List<Integer>> points;
 
     public void setMa(MainActivity ma) {
         this.ma = ma;
@@ -25,6 +28,7 @@ public class MyDraw extends View {
     public MyDraw(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         isFirst = true;
+        points = new ArrayList<>();
     }
 
     @Override
@@ -43,7 +47,7 @@ public class MyDraw extends View {
             paint.setColor(Color.WHITE);
             c.drawColor(Color.BLACK);
             c.drawCircle(x, y, radius, paint);
-
+            points.add(Arrays.asList(x, y, time));
             time++;
 
 
